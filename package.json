@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/DoxaNetwork/gopher/issues"
   },
-  "homepage": "https://github.com/DoxaNetwork/gopher#readme"
+  "homepage": "https://github.com/DoxaNetwork/gopher#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
 }
