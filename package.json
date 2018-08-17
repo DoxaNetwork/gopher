@@ -1,0 +1,19 @@
+{
+  "name": "gopher",
+  "version": "1.0.0",
+  "description": "back-end service for Toasty",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DoxaNetwork/gopher.git"
+  },
+  "author": "Travis Hairfield",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DoxaNetwork/gopher/issues"
+  },
+  "homepage": "https://github.com/DoxaNetwork/gopher#readme"
+}
