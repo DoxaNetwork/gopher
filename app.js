@@ -1,15 +1,26 @@
-const express = require('express'),
-      app = express(),
-      bodyParser = require('body-parser'),
-      cors = require('cors'),
-      Datastore = require('nedb'),
-      webpush = require('web-push');
-      db = new Datastore({ filename: './datafile', autoload: true });
+import express from 'express';
+import bodyParser from 'body-parser'
+import cors from 'cors'
+import Datastore from 'nedb'
+import webpush from 'web-push'
+import Web3 from 'web3'
 
-const vapidKeys = {
-    publicKey: 'BMxIuowQ1--yaQr7jFqkV6TLDt8ttKEGXGxKqwJFPkaslR9mvL6CtVfIOTzIRrXFgcjQt5AC08hVsT59jaJ729U',
-    privateKey: 'bteELaCCW9Q950OBOnekQ-c7sh7XUAd44TwRtQpqdDQ'
-};
+import freq1JSON from '/Users/thairfield/Code/Toasty/build/contracts/DoxaHub.json';
+import freq2JSON from '/Users/thairfield/Code/Toasty/build/contracts/HigherFreq.json';
+import freq3JSON from '/Users/thairfield/Code/Toasty/build/contracts/Freq3.json';
+import freq4JSON from '/Users/thairfield/Code/Toasty/build/contracts/Freq4.json';
+import freq5JSON from '/Users/thairfield/Code/Toasty/build/contracts/Freq5.json';
+
+
+const app = express(),
+      db = new Datastore({ filename: './datafile', autoload: true }),
+      // provider = new Web3.providers.HttpProvider('https://ropsten.infura.io/f6NOUQqHkXc64NJgRwvj'),
+      provider = new Web3.providers.HttpProvider('http://localhost:8545/'),
+      web3 = new Web3(provider),
+      vapidKeys = {
+          publicKey: 'BMxIuowQ1--yaQr7jFqkV6TLDt8ttKEGXGxKqwJFPkaslR9mvL6CtVfIOTzIRrXFgcjQt5AC08hVsT59jaJ729U',
+          privateKey: 'bteELaCCW9Q950OBOnekQ-c7sh7XUAd44TwRtQpqdDQ'
+      };
 
 webpush.setVapidDetails(
   'mailto:travis@doxa.network',
@@ -22,59 +33,94 @@ app.use(bodyParser.json());
 
 const dataToSend = "test!!"
 
-// script that I can turn on
-// it will wait until publish time
-// then publish by sending to geth
-// then go back to sleep
-// develop locally then put on aws
+async function getContract(freq) {
+  let contractJSON;
+  switch(freq) {
+    case 'freq1':
+      contractJSON = freq1JSON
+      break;
+    case 'freq2':
+      contractJSON = freq2JSON
+      break;
+    case 'freq3':
+      contractJSON = freq3JSON
+      break;
+    case 'freq4':
+      contractJSON = freq4JSON
+      break;
+    case 'freq5':
+      contractJSON = freq5JSON
+      break;
+  }
+  const networkId = await web3.eth.net.getId();
+  const address = contractJSON.networks[networkId].address;
+  const contract = new web3.eth.Contract(contractJSON.abi, address);
+  return contract;
+}
+
+async function publish(freq) {
+  console.log(`${freq} - publishing now`)
+  const contract = await getContract(freq);
+  const gasEstimate = await contract.methods.publish().estimateGas({from: '0xd45e8cbb5a04c5e98ceb29d8ad9147ee0d0f3ec2'});
+  const result = await contract.methods.publish().send({from: '0xd45e8cbb5a04c5e98ceb29d8ad9147ee0d0f3ec2', gas: gasEstimate});
+
+  const event = result.events["Published"];
+  if (event) {
+    console.log(`${freq} - new item published`);
+    const owner = event.returnValues.owner;
+    const version = event.returnValues.version;
+    const content = event.returnValues.content;
+    await publishNotification(JSON.stringify({freq, owner}));
+  }
+  return result;
+}
+
+async function setNextPublish(freq) {
+  const contract = await getContract(freq);
+  const nextPublishTime = await contract.methods.nextPublishTime().call();
+  const nextPublishDate = new Date(nextPublishTime * 1000);
+  const currentTime = new Date();
+
+  let msec = nextPublishDate.getTime() - currentTime.getTime();
+
+  console.log(`${freq} - publishing in ${msec/1000} secs`);
+  setTimeout(async function() {
+    await publish(freq);
+    await setNextPublish(freq);
+  }, msec)
+}
+
+setNextPublish('freq1');
+setNextPublish('freq2');
+setNextPublish('freq3');
+setNextPublish('freq4');
+setNextPublish('freq5');
 
 
-// script that can publish
-// script that can grab the nextPublishTime from the freqs
-// script that can wait until the nextPublishTime before publishing
-// put in aws
+async function publishNotification(dataToSend) {
+  const subscriptions = await getSubscriptionsFromDatabase()
 
+  for (let i = 0; i < subscriptions.length; i++) {
+    const subscription = subscriptions[i];
+    try {
+      await triggerPushMsg(subscription, dataToSend);
+    } catch(err) {
+      console.log(`error sending push to ${subscription}`)
+      console.log(err)
+    }
+  }
+}
 
-app.get('/api/send-notification/', function (req, res)  {
-    return getSubscriptionsFromDatabase()
-      .then(function(subscriptions) {
-        let promiseChain = Promise.resolve();
-
-        for (let i = 0; i < subscriptions.length; i++) {
-          const subscription = subscriptions[i];
-          promiseChain = promiseChain.then(() => {
-            return triggerPushMsg(subscription, dataToSend);
-          });
-        }
-
-        return promiseChain;
-      })
-      .then(() => {
-          res.setHeader('Content-Type', 'application/json');
-            res.send(JSON.stringify({ data: { success: true } }));
-        })
-        .catch(function(err) {
-          res.status(500);
-          res.setHeader('Content-Type', 'application/json');
-          res.send(JSON.stringify({
-            error: {
-              id: 'unable-to-send-messages',
-              message: `We were unable to send messages to all subscriptions : ` +
-                `'${err.message}'`
-            }
-          }));
-        });
-});
-
-const triggerPushMsg = function(subscription, dataToSend) {
-  return webpush.sendNotification(subscription, dataToSend)
-  .catch((err) => {
+const triggerPushMsg = async function(subscription, dataToSend) {
+  try {
+    webpush.sendNotification(subscription, dataToSend);
+  } catch(err) {
     if (err.statusCode === 410) {
       return deleteSubscriptionFromDatabase(subscription._id);
     } else {
       console.log('Subscription is no longer valid: ', err);
     }
-  });
+  }
 };
 
 app.post('/api/save-subscription/', async function (req, res) {
@@ -143,4 +189,4 @@ function saveSubscriptionToDatabase(subscription) {
   });
 };
 
-app.listen(5000, () => console.log('Example app listening on port 5000!'))
+app.listen(5000, () => console.log('Gopher up and listening on port 5000'))
