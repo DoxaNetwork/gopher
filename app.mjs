@@ -5,11 +5,11 @@ import Datastore from 'nedb'
 import webpush from 'web-push'
 import Web3 from 'web3'
 
-import freq1JSON from '/Users/thairfield/Code/Toasty/build/contracts/DoxaHub.json';
-import freq2JSON from '/Users/thairfield/Code/Toasty/build/contracts/HigherFreq.json';
-import freq3JSON from '/Users/thairfield/Code/Toasty/build/contracts/Freq3.json';
-import freq4JSON from '/Users/thairfield/Code/Toasty/build/contracts/Freq4.json';
-import freq5JSON from '/Users/thairfield/Code/Toasty/build/contracts/Freq5.json';
+import freq1JSON from '../32Daily/build/contracts/DoxaHub.json';
+import freq2JSON from '../32Daily/build/contracts/HigherFreq.json';
+import freq3JSON from '../32Daily/build/contracts/Freq3.json';
+import freq4JSON from '../32Daily/build/contracts/Freq4.json';
+import freq5JSON from '../32Daily/build/contracts/Freq5.json';
 
 
 const app = express(),
