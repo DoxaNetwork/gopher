@@ -61,8 +61,8 @@ async function getContract(freq) {
 async function publish(freq) {
   console.log(`${freq} - publishing now`)
   const contract = await getContract(freq);
-  const gasEstimate = await contract.methods.publish().estimateGas({from: '0xd45e8cbb5a04c5e98ceb29d8ad9147ee0d0f3ec2'});
-  const result = await contract.methods.publish().send({from: '0xd45e8cbb5a04c5e98ceb29d8ad9147ee0d0f3ec2', gas: gasEstimate});
+  const gasEstimate = await contract.methods.publish().estimateGas({from: '0x0b64e7dcb7d1580f8898c78610b38e71ddc79236'});
+  const result = await contract.methods.publish().send({from: '0x0b64e7dcb7d1580f8898c78610b38e71ddc79236', gas: gasEstimate});
 
   const event = result.events["Published"];
   if (event) {
