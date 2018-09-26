@@ -83,7 +83,7 @@ async function setNextPublish(freq) {
 
   let msec = nextPublishDate.getTime() - currentTime.getTime();
 
-  console.log(`${freq} - publishing in ${msec/1000} secs`);
+  console.log(`${freq} - publishing in ${msec/(1000*60)} mins`);
   setTimeout(async function() {
     await publish(freq);
     await setNextPublish(freq);
