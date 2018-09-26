@@ -93,8 +93,8 @@ async function setNextPublish(freq) {
 setNextPublish('freq1');
 setNextPublish('freq2');
 setNextPublish('freq3');
-setNextPublish('freq4');
-setNextPublish('freq5');
+// setNextPublish('freq4');
+// setNextPublish('freq5');
 
 
 async function publishNotification(dataToSend) {
