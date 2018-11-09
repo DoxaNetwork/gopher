@@ -118,4 +118,4 @@ function saveTransactionToDatabase(transaction) {
   });
 };
 
-app.listen(5000, () => console.log('Facuet up and listening on port 5001'))
+app.listen(5001, () => console.log('Facuet up and listening on port 5001'))
