@@ -1,8 +1,8 @@
 {
   "name": "gopher",
   "version": "1.0.0",
-  "description": "back-end service for Toasty",
-  "main": "app.js",
+  "description": "back-end services for Toasty",
+  "main": "publisher.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
