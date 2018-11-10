@@ -15,7 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 
-app.post('/api/request-funds/', async function(req, res) {
+app.post('/faucet/', async function(req, res) {
   const isValidRequest = (req, res) => {
       // Check the request body has at least an address.
       if (!req.body || !req.body.address || !web3.utils.isAddress(req.body.address)) {
