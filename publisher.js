@@ -44,7 +44,7 @@ async function publish(freq) {
   // const gasEstimate = await contract.methods.publish().estimateGas({from: '0xd45e8cbb5a04c5e98ceb29d8ad9147ee0d0f3ec2'});
   let result;
   try {
-    result = await contract.methods.publish().send({from: publishAccount, gas: 8000029});
+    result = await contract.methods.publish().send({from: publishAccount, gas: 7000000});
   } catch(e) {
     console.log("error: " + e)
   }
