@@ -8,7 +8,7 @@ import Web3 from 'web3'
 import freqJSON from '../32Daily/build/contracts/DoxaHub.json';
 import factories from '../32Daily/build/factories/freqs.json';
 
-const publishAccount = '0xd45e8cbb5a04c5e98ceb29d8ad9147ee0d0f3ec2';
+const publishAccount = '0x0b64e7dcb7d1580f8898c78610b38e71ddc79236';
 
 const app = express(),
       db = new Datastore({ filename: './subscriptions', autoload: true }),
