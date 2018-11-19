@@ -47,6 +47,7 @@ async function publish(freq) {
     result = await contract.methods.publish().send({from: publishAccount, gas: 7000000, gasPrice: 10*10**9});
   } catch(e) {
     console.log("error: " + e)
+    process.exit(1); //this should exit and pm2 should restart the process
   }
 
   // must catch an error here and retry
@@ -74,7 +75,7 @@ async function setNextPublish(freq) {
   setTimeout(async function() {
     await publish(freq);
     await setNextPublish(freq);
-  }, msec + 1000)
+  }, msec + 15*1000)
 }
 
 setNextPublish('freq1');
