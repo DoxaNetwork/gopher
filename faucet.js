@@ -59,7 +59,7 @@ app.post('/api/faucet/', async function(req, res) {
             value:web3.utils.toWei('1', 'ether'), 
             gasLimit: 21000, 
         // check this gasPrice
-            gasPrice: 5*10**9})
+            gasPrice: 20*10**9})
         .on('transactionHash', async function(hash){
             try {
                 await saveTransactionToDatabase({requestAccount, hash});
